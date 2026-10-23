@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Plus, X, ChevronDown, ChevronRight, TrendingUp, TrendingDown, Minus } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, todayISO } from '@/lib/utils'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Exam {
@@ -84,7 +84,7 @@ function AddExamModal({ onClose, onAdded }: {
   onAdded: (exam: Exam, biomarkers: Biomarker[]) => void
 }) {
   const [title,    setTitle]    = useState('')
-  const [date,     setDate]     = useState(new Date().toISOString().split('T')[0])
+  const [date,     setDate]     = useState(todayISO())
   const [examType, setExamType] = useState('blood_work')
   const [provider, setProvider] = useState('')
   const [notes,    setNotes]    = useState('')

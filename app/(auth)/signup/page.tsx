@@ -264,6 +264,12 @@ export default function SignupPage() {
           </div>
         </form>
 
+        <p className="text-center text-xs text-white/30">
+          By creating an account you agree to the{' '}
+          <Link href="/terms" className="underline hover:text-white/60">Terms</Link> and{' '}
+          <Link href="/privacy" className="underline hover:text-white/60">Privacy Policy</Link>.
+        </p>
+
         <p className="text-center text-sm text-white/40">
           Already have an account?{' '}
           <Link href="/login" className="text-violet-400 hover:text-violet-300">

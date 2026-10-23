@@ -1,4 +1,6 @@
 import { createClient }   from '@/lib/supabase/server'
+import { dedupeActivities, mergeDailyMetrics } from '@/lib/metrics/merge'
+import { getTimeZone } from '@/lib/timezone'
 import { redirect }        from 'next/navigation'
 import { daysAgoISO }      from '@/lib/utils'
 import { PatientTabs }     from '@/components/professional/PatientTabs'
@@ -27,6 +29,7 @@ export default async function PatientDetailPage({ params, searchParams }: PagePr
   const { tab = 'overview' } = await searchParams
 
   const supabase = await createClient()
+  const tz = await getTimeZone()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
@@ -59,7 +62,7 @@ export default async function PatientDetailPage({ params, searchParams }: PagePr
           .from('daily_metrics')
           .select('*')
           .eq('user_id', athleteId)
-          .gte('date', daysAgoISO(30))
+          .gte('date', daysAgoISO(30, tz))
           .order('date', { ascending: true })
       : Promise.resolve({ data: [] }),
 
@@ -89,7 +92,7 @@ export default async function PatientDetailPage({ params, searchParams }: PagePr
           .from('life_events')
           .select('*')
           .eq('user_id', athleteId)
-          .gte('date', daysAgoISO(60))
+          .gte('date', daysAgoISO(60, tz))
           .order('date', { ascending: false })
       : Promise.resolve({ data: [] }),
 
@@ -98,13 +101,13 @@ export default async function PatientDetailPage({ params, searchParams }: PagePr
           .from('manual_entries')
           .select('*')
           .eq('user_id', athleteId)
-          .gte('date', daysAgoISO(14))
+          .gte('date', daysAgoISO(14, tz))
           .order('date', { ascending: false })
       : Promise.resolve({ data: [] }),
   ])
 
-  const metrics:    DailyMetrics[]  = (metricsRes.data    ?? []) as DailyMetrics[]
-  const activities: ActivityType[]  = (activitiesRes.data ?? []) as ActivityType[]
+  const metrics:    DailyMetrics[]  = mergeDailyMetrics(metricsRes.data as DailyMetrics[] | null)
+  const activities: ActivityType[]  = dedupeActivities((activitiesRes.data ?? []) as ActivityType[])
   const exams       = examsRes.data    ?? []
   const events      = eventsRes.data   ?? []
   const manual      = manualRes.data   ?? []
@@ -232,7 +235,7 @@ export default async function PatientDetailPage({ params, searchParams }: PagePr
                 <Card>
                   <CardHeader><CardTitle>Sleep — 14 days</CardTitle></CardHeader>
                   <CardContent>
-                    <SleepChart data={metrics.filter(m => m.date >= daysAgoISO(14))} />
+                    <SleepChart data={metrics.filter(m => m.date >= daysAgoISO(14, tz))} />
                   </CardContent>
                 </Card>
               </div>

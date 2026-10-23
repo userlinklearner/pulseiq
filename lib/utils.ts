@@ -23,14 +23,18 @@ export function formatDate(dateStr: string): string {
   })
 }
 
-export function todayISO(): string {
-  return new Date().toISOString().split('T')[0]
+// Calendar date (YYYY-MM-DD) in a time zone. On the server pass the user's zone from
+// getTimeZone() (lib/timezone.ts); in the browser omit it to use the device's zone.
+export function todayISO(timeZone?: string): string {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone, year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(new Date())
 }
 
-export function daysAgoISO(n: number): string {
-  const d = new Date()
-  d.setDate(d.getDate() - n)
-  return d.toISOString().split('T')[0]
+export function daysAgoISO(n: number, timeZone?: string): string {
+  const d = new Date(todayISO(timeZone) + 'T00:00:00Z')
+  d.setUTCDate(d.getUTCDate() - n)
+  return d.toISOString().slice(0, 10)
 }
 
 export function scoreColor(score: number | null, inverted = false): string {

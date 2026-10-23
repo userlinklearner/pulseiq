@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { dedupeActivities, mergeDailyMetrics } from '@/lib/metrics/merge'
+import { getTimeZone } from '@/lib/timezone'
 import { redirect }     from 'next/navigation'
 import { MetricCard } from '@/components/dashboard/MetricCard'
 import { SleepChart } from '@/components/dashboard/SleepChart'
@@ -16,6 +18,7 @@ import { Button } from '@/components/ui/button'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
+  const tz = await getTimeZone()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
@@ -29,9 +32,9 @@ export default async function DashboardPage() {
     redirect('/patients')
   }
 
-  const today     = todayISO()
-  const days30ago = daysAgoISO(30)
-  const days14ago = daysAgoISO(14)
+  const today     = todayISO(tz)
+  const days30ago = daysAgoISO(30, tz)
+  const days14ago = daysAgoISO(14, tz)
 
   // Fetch all data in parallel
   const [metricsRes, activitiesRes, devicesRes, manualRes] = await Promise.all([
@@ -59,8 +62,8 @@ export default async function DashboardPage() {
       .single(),
   ])
 
-  const metrics:    DailyMetrics[]  = metricsRes.data    ?? []
-  const activities: ActivityType[]  = activitiesRes.data ?? []
+  const metrics:    DailyMetrics[]  = mergeDailyMetrics(metricsRes.data)
+  const activities: ActivityType[]  = dedupeActivities((activitiesRes.data ?? []) as ActivityType[])
   const devices    = devicesRes.data ?? []
 
   // No devices connected yet

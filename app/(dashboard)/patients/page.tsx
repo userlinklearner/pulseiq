@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { mergeDailyMetrics } from '@/lib/metrics/merge'
+import { getTimeZone } from '@/lib/timezone'
 import { redirect }      from 'next/navigation'
 import { daysAgoISO }    from '@/lib/utils'
 import { InviteModal }   from '@/components/professional/InviteModal'
@@ -14,6 +16,7 @@ import { cn } from '@/lib/utils'
 
 export default async function PatientsPage() {
   const supabase = await createClient()
+  const tz = await getTimeZone()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
@@ -53,9 +56,9 @@ export default async function PatientsPage() {
   const { data: recentMetrics } = activeIds.length
     ? await supabase
         .from('daily_metrics')
-        .select('user_id, date, hrv_avg, recovery_score, resting_hr, sleep_hours')
+        .select('user_id, date, source, hrv_avg, recovery_score, resting_hr, sleep_hours')
         .in('user_id', activeIds)
-        .gte('date', daysAgoISO(7))
+        .gte('date', daysAgoISO(7, tz))
         .order('date', { ascending: false })
     : { data: [] }
 
@@ -67,7 +70,7 @@ export default async function PatientsPage() {
     sleep_hours: number | null
     date: string
   }> = {}
-  for (const m of (recentMetrics ?? [])) {
+  for (const m of mergeDailyMetrics(recentMetrics).reverse()) {
     if (!latestMetrics[m.user_id]) {
       latestMetrics[m.user_id] = m
     }

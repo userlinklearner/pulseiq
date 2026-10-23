@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
   // Stream response
   const stream = await anthropic.messages.stream({
-    model: 'claude-opus-4-5',
+    model: process.env.COACH_MODEL ?? 'claude-sonnet-5-5',
     max_tokens: 1500,
     system: systemWithContext,
     messages,

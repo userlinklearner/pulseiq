@@ -1,13 +1,15 @@
 import { todayISO } from '@/lib/utils'
+import { getTimeZone } from '@/lib/timezone'
 import { ManualEntryForm } from '@/components/dashboard/ManualEntryForm'
 import { createClient } from '@/lib/supabase/server'
 
 export default async function LogPage() {
   const supabase = await createClient()
+  const tz = await getTimeZone()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
-  const today = todayISO()
+  const today = todayISO(tz)
 
   // Last 7 days entries
   const { data: entries } = await supabase
