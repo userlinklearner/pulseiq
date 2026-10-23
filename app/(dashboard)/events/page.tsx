@@ -1,9 +1,12 @@
 import { createClient } from '@/lib/supabase/server'
+import { mergeDailyMetrics } from '@/lib/metrics/merge'
+import { getTimeZone } from '@/lib/timezone'
 import { EventsTimeline } from './EventsTimeline'
 import { daysAgoISO } from '@/lib/utils'
 
 export default async function EventsPage() {
   const supabase = await createClient()
+  const tz = await getTimeZone()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
@@ -16,9 +19,9 @@ export default async function EventsPage() {
       .limit(50),
     supabase
       .from('daily_metrics')
-      .select('date, hrv_avg, resting_hr, recovery_score, body_battery_wake')
+      .select('date, source, hrv_avg, resting_hr, recovery_score, body_battery_wake')
       .eq('user_id', user.id)
-      .gte('date', daysAgoISO(90))
+      .gte('date', daysAgoISO(90, tz))
       .order('date', { ascending: true }),
   ])
 
@@ -33,7 +36,7 @@ export default async function EventsPage() {
       </div>
       <EventsTimeline
         events={eventsRes.data ?? []}
-        metrics={metricsRes.data ?? []}
+        metrics={mergeDailyMetrics(metricsRes.data)}
       />
     </div>
   )

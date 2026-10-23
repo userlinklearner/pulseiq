@@ -1,45 +1,34 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { after, NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { exchangeWhoopCode, fetchWhoopData, mapWhoopToMetrics } from '@/lib/devices/whoop'
-import { daysAgoISO, todayISO } from '@/lib/utils'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { exchangeWhoopCode } from '@/lib/devices/whoop'
+import { clearState, verifyState } from '@/lib/devices/oauth-state'
+import { saveTokens, syncUserDevices } from '@/lib/devices/sync'
 
+export const maxDuration = 300
+
+// GET /api/devices/whoop -- OAuth callback
 export async function GET(request: NextRequest) {
+  const app = process.env.NEXT_PUBLIC_APP_URL
+  const back = (q: string) => clearState('whoop', NextResponse.redirect(`${app}/connect?${q}`))
   const { searchParams } = new URL(request.url)
-  const code  = searchParams.get('code')
-  const error = searchParams.get('error')
+  const code = searchParams.get('code')
 
-  if (error || !code) {
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/connect?error=whoop_denied`)
-  }
+  if (searchParams.get('error') || !code) return back('error=whoop_denied')
+  if (!verifyState('whoop', request)) return back('error=whoop_state')
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.redirect(`${app}/login`)
 
   try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login`)
-
-    const tokens = await exchangeWhoopCode(code)
-    const expiresAt = new Date(Date.now() + tokens.expires_in * 1000).toISOString()
-
-    await supabase.from('connected_devices').upsert({
-      user_id:          user.id,
-      device_type:      'whoop',
-      access_token:     tokens.access_token,
-      refresh_token:    tokens.refresh_token,
-      token_expires_at: expiresAt,
-      last_synced_at:   new Date().toISOString(),
-    }, { onConflict: 'user_id,device_type' })
-
-    // Initial 30-day sync
-    const whoopData = await fetchWhoopData(tokens.access_token, daysAgoISO(30), todayISO())
-    const rows = mapWhoopToMetrics(whoopData.recovery, whoopData.sleep, user.id)
-
-    if (rows.length) {
-      await supabase.from('daily_metrics').upsert(rows, { onConflict: 'user_id,date,source' })
-    }
-
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/connect?success=whoop`)
+    const admin = createAdminClient()
+    await saveTokens(admin, user.id, 'whoop', await exchangeWhoopCode(code))
+    // Backfill runs after the redirect so the user isn't left waiting on 90 days of history.
+    after(() => syncUserDevices(admin, user.id).then(() => undefined))
+    return back('success=whoop')
   } catch (err) {
     console.error('Whoop OAuth error:', err)
-    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/connect?error=whoop_failed`)
+    return back('error=whoop_failed')
   }
 }

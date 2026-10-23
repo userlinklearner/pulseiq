@@ -5,9 +5,23 @@ import './globals.css'
 const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
+const description = 'Connect Oura, Whoop, and Garmin. Get deep health insights powered by AI.'
+
 export const metadata: Metadata = {
-  title: 'PulseIQ -- Your Health, Unified',
-  description: 'Connect Oura, Whoop, and Garmin. Get deep health insights powered by AI.',
+  metadataBase: new URL('https://pulseiq-psi.vercel.app'),
+  title: 'PulseIQ — Your Health, Unified',
+  description,
+  openGraph: {
+    title: 'PulseIQ — Your Health, Unified',
+    description,
+    siteName: 'PulseIQ',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'PulseIQ — Your Health, Unified',
+    description,
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

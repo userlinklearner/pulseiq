@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { mergeDailyMetrics } from '@/lib/metrics/merge'
+import { getTimeZone } from '@/lib/timezone'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { HRVChart } from '@/components/dashboard/HRVChart'
 import { SleepChart } from '@/components/dashboard/SleepChart'
@@ -9,6 +11,7 @@ import { TrendingChart } from './TrendingChart'
 
 export default async function HistoryPage() {
   const supabase = await createClient()
+  const tz = await getTimeZone()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
@@ -16,10 +19,10 @@ export default async function HistoryPage() {
     .from('daily_metrics')
     .select('*')
     .eq('user_id', user.id)
-    .gte('date', daysAgoISO(90))
+    .gte('date', daysAgoISO(90, tz))
     .order('date', { ascending: true })
 
-  const all: DailyMetrics[] = metrics ?? []
+  const all: DailyMetrics[] = mergeDailyMetrics(metrics)
 
   // Compute stats
   const hrv    = all.filter(m => m.hrv_avg   !== null)

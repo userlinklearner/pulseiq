@@ -3,19 +3,19 @@ import { Button } from '@/components/ui/button'
 import { Zap, Heart, Activity, Moon, TrendingUp, Shield } from 'lucide-react'
 
 const DEVICES = [
-  { name: 'Oura Ring',   color: '#6366f1', icon: '💍', desc: 'HRV, sleep stages, readiness' },
-  { name: 'Whoop',       color: '#f43f5e', icon: '⌚', desc: 'Recovery, strain, sleep coach' },
-  { name: 'Garmin',      color: '#06b6d4', icon: '🏃', desc: 'Activities, GPS, health metrics' },
+  { name: 'Oura Ring',   color: '#6366f1', icon: '💍', desc: 'Sleep stages, HRV, readiness' },
+  { name: 'Whoop',       color: '#f43f5e', icon: '⌚', desc: 'Recovery, strain, sleep' },
+  { name: 'Garmin',      color: '#06b6d4', icon: '🏃', desc: 'Activities, steps, sleep (import)' },
   { name: 'Manual',      color: '#84cc16', icon: '✍️', desc: 'Log mood, energy, any workout' },
 ]
 
 const FEATURES = [
-  { icon: Moon,       title: 'Sleep Analysis',    desc: 'Deep, REM, and light sleep tracked across every device in one view.' },
+  { icon: Moon,       title: 'Sleep Analysis',    desc: 'Deep, REM, and light sleep from your best sensor, merged into one view.' },
   { icon: Heart,      title: 'HRV & Recovery',    desc: 'Know if today is a go-hard day or a rest day before you even start.' },
   { icon: Activity,   title: 'Training Load',     desc: 'All your workouts unified — running, cycling, swimming, strength.' },
   { icon: TrendingUp, title: 'Long-Term Trends',  desc: 'See your fitness trajectory over months and years, not just today.' },
-  { icon: Shield,     title: 'Stress & Wellness', desc: 'Body battery, stress scores, and subjective wellbeing in one place.' },
-  { icon: Zap,        title: 'AI Coach',          desc: 'Daily coaching based on YOUR actual data, not generic advice.' },
+  { icon: Shield,     title: 'How You Feel',      desc: 'Log mood, energy, soreness and life events next to your device data.' },
+  { icon: Zap,        title: 'AI Coach',          desc: 'Coaching based on YOUR actual data, not generic advice. Not medical advice.', pro: true },
 ]
 
 export default function LandingPage() {
@@ -43,7 +43,7 @@ export default function LandingPage() {
       <section className="max-w-6xl mx-auto px-6 pt-24 pb-16 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-300 text-xs font-medium mb-8">
           <Zap className="w-3 h-3" />
-          Connect Oura, Whoop & Garmin in minutes
+          Connect Oura and Whoop in minutes. Import your Garmin history.
         </div>
         <h1 className="text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
           Every health signal.<br />
@@ -87,12 +87,19 @@ export default function LandingPage() {
         <h2 className="text-3xl font-bold text-center mb-3">Everything you need to train smarter</h2>
         <p className="text-white/40 text-center mb-12">No more switching between apps. All your data, deeply analyzed.</p>
         <div className="grid md:grid-cols-3 gap-5">
-          {FEATURES.map(({ icon: Icon, title, desc }) => (
+          {FEATURES.map(({ icon: Icon, title, desc, pro }) => (
             <div key={title} className="p-5 rounded-xl border border-white/10 bg-white/5 space-y-3">
               <div className="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center">
                 <Icon className="w-4 h-4 text-violet-400" />
               </div>
-              <h3 className="font-semibold text-white">{title}</h3>
+              <h3 className="font-semibold text-white flex items-center gap-2">
+                {title}
+                {pro && (
+                  <span className="text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300">
+                    Pro
+                  </span>
+                )}
+              </h3>
               <p className="text-sm text-white/50 leading-relaxed">{desc}</p>
             </div>
           ))}
@@ -103,7 +110,7 @@ export default function LandingPage() {
       <section className="max-w-2xl mx-auto px-6 pb-24 text-center">
         <div className="p-10 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-600/20 border border-violet-500/20">
           <h2 className="text-3xl font-bold mb-3">Start understanding your body today</h2>
-          <p className="text-white/50 mb-8">Free. No credit card required.</p>
+          <p className="text-white/50 mb-8">Free to start. No credit card required. Pro features include a 7-day free trial.</p>
           <Button size="lg" asChild className="w-full max-w-xs">
             <Link href="/signup">Create your account</Link>
           </Button>
@@ -111,8 +118,12 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-white/10 py-8 text-center text-white/20 text-sm">
-        <p>PulseIQ &copy; {new Date().getFullYear()}</p>
+      <footer className="border-t border-white/10 py-8 text-center text-white/30 text-sm space-y-2">
+        <div className="flex items-center justify-center gap-4">
+          <Link href="/privacy" className="hover:text-white/60">Privacy</Link>
+          <Link href="/terms" className="hover:text-white/60">Terms</Link>
+        </div>
+        <p>PulseIQ is a training tool, not a medical device. &copy; {new Date().getFullYear()}</p>
       </footer>
     </div>
   )

@@ -91,7 +91,7 @@ export default function SignupPage() {
           </div>
           <h1 className="text-2xl font-bold text-white">Create your account</h1>
           <p className="text-white/40 text-sm mt-1">
-            {step === 1 ? 'Free forever. Connect up to 3 devices.' :
+            {step === 1 ? 'Free to start. No credit card required.' :
              step === 2 ? 'Who are you on PulseIQ?' :
              'Set up your professional profile.'}
           </p>
@@ -263,6 +263,12 @@ export default function SignupPage() {
             </Button>
           </div>
         </form>
+
+        <p className="text-center text-xs text-white/30">
+          By creating an account you agree to the{' '}
+          <Link href="/terms" className="underline hover:text-white/60">Terms</Link> and{' '}
+          <Link href="/privacy" className="underline hover:text-white/60">Privacy Policy</Link>.
+        </p>
 
         <p className="text-center text-sm text-white/40">
           Already have an account?{' '}

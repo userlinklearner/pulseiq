@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Plus, X, TrendingDown, TrendingUp, Minus } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn, todayISO } from '@/lib/utils'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface LifeEvent {
@@ -57,7 +57,7 @@ const CAT_MAP = Object.fromEntries(CATEGORIES.map(c => [c.key, c]))
 // ─── Add Event Modal ──────────────────────────────────────────────────────────
 function AddEventModal({ onClose, onAdded }: { onClose: () => void; onAdded: (e: LifeEvent) => void }) {
   const [title,     setTitle]     = useState('')
-  const [date,      setDate]      = useState(new Date().toISOString().split('T')[0])
+  const [date,      setDate]      = useState(todayISO())
   const [endDate,   setEndDate]   = useState('')
   const [category,  setCategory]  = useState('social')
   const [impacts,   setImpacts]   = useState<string[]>([])

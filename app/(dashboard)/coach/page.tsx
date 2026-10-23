@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { mergeDailyMetrics } from '@/lib/metrics/merge'
+import { getTimeZone } from '@/lib/timezone'
 import { CoachChat } from '@/components/coach/CoachChat'
 import { CommunityInsights } from '@/components/coach/CommunityInsights'
 import { UpgradeGate } from '@/components/paywall/UpgradeGate'
@@ -10,6 +12,7 @@ import Link from 'next/link'
 
 export default async function CoachPage() {
   const supabase = await createClient()
+  const tz = await getTimeZone()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
 
@@ -29,16 +32,16 @@ export default async function CoachPage() {
     isCoach
       ? supabase.from('coach_conversations').select('id, title, created_at').eq('user_id', user.id).order('updated_at', { ascending: false }).limit(10)
       : Promise.resolve({ data: [] }),
-    supabase.from('daily_metrics').select('hrv_avg').eq('user_id', user.id).gte('date', daysAgoISO(7)).not('hrv_avg', 'is', null),
+    supabase.from('daily_metrics').select('date, source, hrv_avg').eq('user_id', user.id).gte('date', daysAgoISO(7, tz)).not('hrv_avg', 'is', null),
   ])
 
   const profile   = profileRes.data
   const community = communityRes.data ?? []
   const convs     = convRes.data ?? []
-  const metrics   = metricsRes.data ?? []
+  const metrics   = mergeDailyMetrics(metricsRes.data).filter(m => m.hrv_avg !== null)
 
   const avgHrv = metrics.length
-    ? metrics.reduce((s: number, m: { hrv_avg: number }) => s + m.hrv_avg, 0) / metrics.length
+    ? metrics.reduce((s: number, m: { hrv_avg: number | null }) => s + (m.hrv_avg ?? 0), 0) / metrics.length
     : null
 
   const ageGroup = profile?.birth_year
