@@ -91,7 +91,7 @@ export default function SignupPage() {
           </div>
           <h1 className="text-2xl font-bold text-white">Create your account</h1>
           <p className="text-white/40 text-sm mt-1">
-            {step === 1 ? 'Free forever. Connect up to 3 devices.' :
+            {step === 1 ? 'Free to start. No credit card required.' :
              step === 2 ? 'Who are you on PulseIQ?' :
              'Set up your professional profile.'}
           </p>

@@ -15,7 +15,7 @@ const FEATURES = [
   { icon: Activity,   title: 'Training Load',     desc: 'All your workouts unified — running, cycling, swimming, strength.' },
   { icon: TrendingUp, title: 'Long-Term Trends',  desc: 'See your fitness trajectory over months and years, not just today.' },
   { icon: Shield,     title: 'Stress & Wellness', desc: 'Body battery, stress scores, and subjective wellbeing in one place.' },
-  { icon: Zap,        title: 'AI Coach',          desc: 'Daily coaching based on YOUR actual data, not generic advice.' },
+  { icon: Zap,        title: 'AI Coach',          desc: 'Coaching based on YOUR actual data, not generic advice. Not medical advice.', pro: true },
 ]
 
 export default function LandingPage() {
@@ -87,12 +87,19 @@ export default function LandingPage() {
         <h2 className="text-3xl font-bold text-center mb-3">Everything you need to train smarter</h2>
         <p className="text-white/40 text-center mb-12">No more switching between apps. All your data, deeply analyzed.</p>
         <div className="grid md:grid-cols-3 gap-5">
-          {FEATURES.map(({ icon: Icon, title, desc }) => (
+          {FEATURES.map(({ icon: Icon, title, desc, pro }) => (
             <div key={title} className="p-5 rounded-xl border border-white/10 bg-white/5 space-y-3">
               <div className="w-9 h-9 rounded-lg bg-violet-500/20 flex items-center justify-center">
                 <Icon className="w-4 h-4 text-violet-400" />
               </div>
-              <h3 className="font-semibold text-white">{title}</h3>
+              <h3 className="font-semibold text-white flex items-center gap-2">
+                {title}
+                {pro && (
+                  <span className="text-[10px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded bg-violet-500/20 text-violet-300">
+                    Pro
+                  </span>
+                )}
+              </h3>
               <p className="text-sm text-white/50 leading-relaxed">{desc}</p>
             </div>
           ))}
@@ -103,7 +110,7 @@ export default function LandingPage() {
       <section className="max-w-2xl mx-auto px-6 pb-24 text-center">
         <div className="p-10 rounded-2xl bg-gradient-to-br from-violet-500/20 to-indigo-600/20 border border-violet-500/20">
           <h2 className="text-3xl font-bold mb-3">Start understanding your body today</h2>
-          <p className="text-white/50 mb-8">Free. No credit card required.</p>
+          <p className="text-white/50 mb-8">Free to start. No credit card required. Pro features include a 7-day free trial.</p>
           <Button size="lg" asChild className="w-full max-w-xs">
             <Link href="/signup">Create your account</Link>
           </Button>
