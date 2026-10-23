@@ -4,11 +4,8 @@ export interface ConnectedDevice {
   id: string
   user_id: string
   device_type: DeviceType
-  access_token: string | null
-  refresh_token: string | null
-  token_expires_at: string | null
   last_synced_at: string | null
-  meta: Record<string, unknown>
+  meta: { status?: 'ok' | 'error' | 'reauth_required'; last_error?: string | null; mode?: string } | null
   created_at: string
 }
 
